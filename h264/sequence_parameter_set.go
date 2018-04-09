@@ -189,6 +189,12 @@ func (m SequenceParameterSet) MarshalBinary() ([]byte, error) {
 		}
 	}
 
+	if w.BitLen()%8 != 0 {
+		if _, err := w.WriteBit(BitOne); err != nil {
+			return nil, err
+		}
+	}
+
 	return w.Bytes(), nil
 }
 

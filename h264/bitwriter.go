@@ -88,3 +88,7 @@ func (w *bitWriter) WriteBit(b ...Bit) (writtenBit int, err error) {
 func (w *bitWriter) Bytes() []byte {
 	return w.buf[:(w.n+7)/8]
 }
+
+func (w *bitWriter) BitLen() int {
+	return w.n
+}
