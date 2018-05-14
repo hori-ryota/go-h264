@@ -30,7 +30,7 @@ func (m AVCDecoderConfigurationRecord) MarshalBinary() ([]byte, error) {
 	b[1] = m.AVCProfileIndication
 	b[2] = m.ProfileCompatibility
 	b[3] = m.AVCLevelIndication
-	b[4] = m.LengthSizeMinusOne
+	b[4] = m.LengthSizeMinusOne | 0xfc
 
 	b[5] = 0xe0 | byte(len(m.SequenceParameterSetNALUnits))
 	ind := 6
@@ -62,9 +62,9 @@ func (m *AVCDecoderConfigurationRecord) UnmarshalBinary(b []byte) error {
 	m.AVCProfileIndication = b[1]
 	m.ProfileCompatibility = b[2]
 	m.AVCLevelIndication = b[3]
-	m.LengthSizeMinusOne = b[4]
+	m.LengthSizeMinusOne = b[4] & 0x03
 
-	numOfSequenceParameterSets := b[5] & 0x3
+	numOfSequenceParameterSets := b[5] & 0x1f
 	m.SequenceParameterSetNALUnits = make([][]byte, numOfSequenceParameterSets)
 	ind := 6
 	for i := uint8(0); i < numOfSequenceParameterSets; i++ {

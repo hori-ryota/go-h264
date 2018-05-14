@@ -32,7 +32,7 @@ func (r *bitReader) ReadBit() (Bit, error) {
 	if len(r.buf)*8-r.n < 1 {
 		return BitZero, io.EOF
 	}
-	b := Bit(r.buf[r.n/8]&(0xff)^(1<<uint8(7-r.n%8)) > 0)
+	b := Bit((r.buf[r.n/8]>>uint8(7-r.n%8))&1 > 0)
 	r.n++
 	return b, nil
 }
