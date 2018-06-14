@@ -66,7 +66,7 @@ func (m NALUnit) MarshalBinary() ([]byte, error) {
 		return nil, err
 	}
 
-	return nil, nil
+	return w.Bytes(), nil
 }
 
 func (m *NALUnit) UnmarshalBinary(b []byte) error {
@@ -115,7 +115,7 @@ func (m *NALUnit) UnmarshalBinary(b []byte) error {
 		}
 	}
 
-	m.RBSPByte = bytes.Join(bytes.Split(b[ind:], []byte{0, 0, 0x03}), nil)
+	m.RBSPByte = bytes.Join(bytes.Split(b[ind:], []byte{0, 0, 0x03}), []byte{0, 0})
 
 	return nil
 }
@@ -166,9 +166,9 @@ func (m *NALUnitHeaderSVCExtension) UnmarshalBinary(b []byte) error {
 	m.IDRFlag = b[0]>>6&1 == 1
 	m.PriorityID = b[0] & 0x3f
 	m.NoInterLayerPredFlag = b[1]>>7&1 == 1
-	m.DependencyID = b[0] >> 4 & 0x07
-	m.QualityID = b[0] & 0x0f
-	m.TemporalID = b[0] >> 5
+	m.DependencyID = b[1] >> 4 & 0x07
+	m.QualityID = b[1] & 0x0f
+	m.TemporalID = b[2] >> 5
 	m.UseRefBasePicFlag = b[2]>>4&1 == 1
 	m.DiscardableFlag = b[2]>>3&1 == 1
 	m.OutputFlag = b[2]>>2&1 == 1
@@ -189,7 +189,7 @@ func (m NALUnitHeaderAVC3dExtension) MarshalBinary() ([]byte, error) {
 	b := make([]byte, 2)
 	b[0] |= 1 << 7
 	b[0] |= m.ViewIdx >> 1
-	b[1] |= (m.ViewIdx | 1) << 7
+	b[1] |= (m.ViewIdx & 1) << 7
 	if m.DepthFlag {
 		b[1] |= 1 << 6
 	}
@@ -233,7 +233,6 @@ type NALUnitHeaderMVCExtension struct {
 
 func (m NALUnitHeaderMVCExtension) MarshalBinary() ([]byte, error) {
 	b := make([]byte, 3)
-	b[0] |= 1 << 7
 	if m.NonIDRFlag {
 		b[0] |= 1 << 6
 	}
@@ -261,7 +260,7 @@ func (m *NALUnitHeaderMVCExtension) UnmarshalBinary(b []byte) error {
 	m.NonIDRFlag = b[0]>>6&1 == 1
 	m.PriorityID = b[0] & 0x3f
 	m.ViewID = uint16(b[1])<<2 | uint16(b[2]>>6)
-	m.TemporalID = b[2] >> 3
+	m.TemporalID = b[2] >> 3 & 0x7
 	m.AnchorPicFlag = b[2]>>2&1 == 1
 	m.InterViewFlag = b[2]>>1&1 == 1
 	m.ReservedOneBit = b[2]&1 == 1

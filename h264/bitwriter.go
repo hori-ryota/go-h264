@@ -54,7 +54,7 @@ func (w *bitWriter) mightAppendBuf(bitLen int) {
 	} else {
 		b = make([]byte, len(w.buf)+byteLen)
 	}
-	byteInd := w.n/8 + 1
+	byteInd := (w.n+1)/8 - 1
 	copy(b[:byteInd+1], w.buf[:byteInd+1])
 	w.buf = b
 }

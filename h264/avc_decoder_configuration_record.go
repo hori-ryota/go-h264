@@ -65,25 +65,32 @@ func (m *AVCDecoderConfigurationRecord) UnmarshalBinary(b []byte) error {
 	m.LengthSizeMinusOne = b[4] & 0x03
 
 	numOfSequenceParameterSets := b[5] & 0x1f
-	m.SequenceParameterSetNALUnits = make([][]byte, numOfSequenceParameterSets)
+
 	ind := 6
-	for i := uint8(0); i < numOfSequenceParameterSets; i++ {
-		l := int(binary.BigEndian.Uint16(b[ind : ind+2]))
-		ind += 2
-		m.SequenceParameterSetNALUnits[i] = make([]byte, l)
-		m.SequenceParameterSetNALUnits[i] = b[ind : ind+l]
-		ind += l
+
+	if numOfSequenceParameterSets > 0 {
+		m.SequenceParameterSetNALUnits = make([][]byte, numOfSequenceParameterSets)
+		for i := uint8(0); i < numOfSequenceParameterSets; i++ {
+			l := int(binary.BigEndian.Uint16(b[ind : ind+2]))
+			ind += 2
+			m.SequenceParameterSetNALUnits[i] = make([]byte, l)
+			m.SequenceParameterSetNALUnits[i] = b[ind : ind+l]
+			ind += l
+		}
 	}
 
 	numOfPictureParameterSets := b[ind]
 	ind += 1
-	m.PictureParameterSetNALUnits = make([][]byte, numOfPictureParameterSets)
-	for i := uint8(0); i < numOfPictureParameterSets; i++ {
-		l := int(binary.BigEndian.Uint16(b[ind : ind+2]))
-		ind += 2
-		m.PictureParameterSetNALUnits[i] = make([]byte, l)
-		m.PictureParameterSetNALUnits[i] = b[ind : ind+l]
-		ind += l
+
+	if numOfPictureParameterSets > 0 {
+		m.PictureParameterSetNALUnits = make([][]byte, numOfPictureParameterSets)
+		for i := uint8(0); i < numOfPictureParameterSets; i++ {
+			l := int(binary.BigEndian.Uint16(b[ind : ind+2]))
+			ind += 2
+			m.PictureParameterSetNALUnits[i] = make([]byte, l)
+			m.PictureParameterSetNALUnits[i] = b[ind : ind+l]
+			ind += l
+		}
 	}
 
 	return nil

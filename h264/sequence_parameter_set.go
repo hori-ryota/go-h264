@@ -66,6 +66,9 @@ func (m SequenceParameterSet) MarshalBinary() ([]byte, error) {
 	if err := w.WriteByte(m.LevelIDC); err != nil {
 		return nil, err
 	}
+	if _, err := writeExponentialGolombCoding(w, Uint64ToGolombCodeNum(m.SequenceParamterSetID)); err != nil {
+		return nil, err
+	}
 
 	switch m.ProfileIDC {
 	case 100, 110, 122, 244, 44, 83, 86, 118, 128, 138, 139, 134, 135:
@@ -189,10 +192,9 @@ func (m SequenceParameterSet) MarshalBinary() ([]byte, error) {
 		}
 	}
 
-	if w.BitLen()%8 != 0 {
-		if _, err := w.WriteBit(BitOne); err != nil {
-			return nil, err
-		}
+	// trailing bits
+	if _, err := w.WriteBit(BitOne); err != nil {
+		return nil, err
 	}
 
 	return w.Bytes(), nil
@@ -336,19 +338,20 @@ func (m *SequenceParameterSet) UnmarshalBinary(b []byte) error {
 			return err
 		}
 		m.OffsetForTopToBottomField = GolombCodeNumToInt64(g)
-		m.OffsetForNonRefPic = GolombCodeNumToInt64(g)
 		g, err = readExponentialGolombCoding(r)
 		if err != nil {
 			return err
 		}
 		m.NumRefFramesInPicOrderCntCycle = GolombCodeNumToUint64(g)
-		m.OffsetForRefFrame = make([]int64, m.NumRefFramesInPicOrderCntCycle)
-		for i := range m.OffsetForRefFrame {
-			g, err = readExponentialGolombCoding(r)
-			if err != nil {
-				return err
+		if m.NumRefFramesInPicOrderCntCycle > 0 {
+			m.OffsetForRefFrame = make([]int64, m.NumRefFramesInPicOrderCntCycle)
+			for i := range m.OffsetForRefFrame {
+				g, err = readExponentialGolombCoding(r)
+				if err != nil {
+					return err
+				}
+				m.OffsetForRefFrame[i] = GolombCodeNumToInt64(g)
 			}
-			m.OffsetForRefFrame[i] = GolombCodeNumToInt64(g)
 		}
 	}
 	g, err = readExponentialGolombCoding(r)
