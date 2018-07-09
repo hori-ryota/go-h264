@@ -75,9 +75,9 @@ func readHypotheticalReferenceDecoder(r *bitReader) (m HypotheticalReferenceDeco
 	}
 	m.BitRateScale = b >> 4
 	m.CPBSizeScale = b & 0x0f
-	m.BitRateValueMinus1 = make([]uint64, m.CPBCntMinus1)
-	m.CPBSizeValueMinus1 = make([]uint64, m.CPBCntMinus1)
-	m.CBRFlag = make([]bool, m.CPBCntMinus1)
+	m.BitRateValueMinus1 = make([]uint64, m.CPBCntMinus1+1)
+	m.CPBSizeValueMinus1 = make([]uint64, m.CPBCntMinus1+1)
+	m.CBRFlag = make([]bool, m.CPBCntMinus1+1)
 	for i := 0; i <= int(m.CPBCntMinus1); i++ {
 		g, err = readExponentialGolombCoding(r)
 		if err != nil {
