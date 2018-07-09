@@ -1025,7 +1025,63 @@ var SequenceParameterSetTestData = []struct {
 			l, o, // trailing bits
 		),
 	},
-	// TODO VUI test
+	{
+		Name: "VUIParametersPresentFlag is true: without VUIs",
+		Struct: SequenceParameterSet{
+			VUIParametersPresentFlag: true,
+		},
+		Binary: mustBitToBytes(
+			o, o, o, o, o, o, o, o, // ProfileIDC
+			o, o, o, o, o, o, o, o, // ConstraintFlags
+			o, o, o, o, o, o, o, o, // LevelIDC
+			l, // SequenceParamterSetID
+			l, // Log2MaxFrameNumMinus4
+			l, // PicOrderCntType
+			l, // Log2MaxPicOrderCntLsbMinus4
+			l, // MaxNumRefFrames
+			o, // GapsInFrameNumValueAllowedFlag
+			l, // PicWidthInMbsMinus1
+			l, // PicHeightInMapUnitsMinus1
+
+			o, // FrameMbsOnlyFlag
+			o, // MBAdaptiveFrameFieldFlag
+			o, // Direct8x8InterenceFlag
+			o, // FrameCroppingFlag
+
+			l,       // VUIParametersPresentFlag
+			l, o, o, // trailing bits
+		),
+	},
+	{
+		Name: "VUIParametersPresentFlag is true: with 2 empty VUIs",
+		Struct: SequenceParameterSet{
+			VUIParametersPresentFlag: true,
+			VUIs: make([]VideoUsabilityInformation, 2),
+		},
+		Binary: mustBitToBytes(
+			o, o, o, o, o, o, o, o, // ProfileIDC
+			o, o, o, o, o, o, o, o, // ConstraintFlags
+			o, o, o, o, o, o, o, o, // LevelIDC
+			l, // SequenceParamterSetID
+			l, // Log2MaxFrameNumMinus4
+			l, // PicOrderCntType
+			l, // Log2MaxPicOrderCntLsbMinus4
+			l, // MaxNumRefFrames
+			o, // GapsInFrameNumValueAllowedFlag
+			l, // PicWidthInMbsMinus1
+			l, // PicHeightInMapUnitsMinus1
+
+			o, // FrameMbsOnlyFlag
+			o, // MBAdaptiveFrameFieldFlag
+			o, // Direct8x8InterenceFlag
+			o, // FrameCroppingFlag
+
+			l,                         // VUIParametersPresentFlag
+			o, o, o, o, o, o, o, o, o, // 1 VUI
+			o, o, o, o, o, o, o, o, o, // 2 VUI
+			l, // trailing bits
+		),
+	},
 }
 
 func TestSequenceParameterSet_MarshalBinary(t *testing.T) {
