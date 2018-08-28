@@ -289,17 +289,28 @@ func (m *SequenceParameterSet) UnmarshalBinary(b []byte) error {
 					return err
 				}
 				if m.SequenceScalingListPresentFlag[i] {
+					var sizeOfScalingList int
 					if i < 6 {
-						m.ScalingListDeltaScales[i] = make([]int64, 16)
+						sizeOfScalingList = 16
 					} else {
-						m.ScalingListDeltaScales[i] = make([]int64, 64)
+						sizeOfScalingList = 64
 					}
-					for j := range m.ScalingListDeltaScales[i] {
-						g, err = readExponentialGolombCoding(r)
-						if err != nil {
-							return err
+					m.ScalingListDeltaScales[i] = make([]int64, 0, sizeOfScalingList)
+
+					lastScale := int64(8)
+					nextScale := int64(8)
+					for j := 0; j < sizeOfScalingList; j++ {
+						if nextScale != 0 {
+							g, err = readExponentialGolombCoding(r)
+							if err != nil {
+								return err
+							}
+							m.ScalingListDeltaScales[i] = append(m.ScalingListDeltaScales[i], GolombCodeNumToInt64(g))
+							nextScale = (lastScale + m.ScalingListDeltaScales[i][j] + 256) % 256
 						}
-						m.ScalingListDeltaScales[i][j] = GolombCodeNumToInt64(g)
+						if nextScale != 0 {
+							lastScale = nextScale
+						}
 					}
 				}
 			}
