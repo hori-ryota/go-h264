@@ -57,10 +57,21 @@ func (m NALUnit) MarshalBinary() ([]byte, error) {
 		}
 	}
 
-	rbspb := bytes.Replace(m.RBSPByte, []byte{0, 0, 0x03}, []byte{0, 0, 0x03, 0x03}, -1)
-	rbspb = bytes.Replace(rbspb, []byte{0, 0, 0x02}, []byte{0, 0, 0x03, 0x02}, -1)
-	rbspb = bytes.Replace(rbspb, []byte{0, 0, 0x01}, []byte{0, 0, 0x03, 0x01}, -1)
-	rbspb = bytes.Replace(rbspb, []byte{0, 0, 0x00}, []byte{0, 0, 0x03, 0x00}, -1)
+	var rbspb []byte
+	if len(m.RBSPByte) < 3 {
+		rbspb = m.RBSPByte
+	} else {
+		rbspb = make([]byte, 0, len(m.RBSPByte))
+		rbspb = append(rbspb, m.RBSPByte[:2]...)
+		for _, b := range m.RBSPByte[2:] {
+			if rbspb[len(rbspb)-2] == 0 &&
+				rbspb[len(rbspb)-1] == 0 &&
+				b <= 0x03 {
+				rbspb = append(rbspb, 0x03)
+			}
+			rbspb = append(rbspb, b)
+		}
+	}
 
 	if _, err := w.Write(rbspb); err != nil {
 		return nil, err
